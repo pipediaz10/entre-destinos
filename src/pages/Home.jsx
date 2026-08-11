@@ -2,7 +2,7 @@
 import logo from "../assets/logo.png"
 
 
-export const Home = () => {
+export const Home = ({ cambiarPagina }) => {
 
     // Lista temporal de destinos.
     // Más adelante estos datos pueden venir desde Firebase.
@@ -11,7 +11,7 @@ export const Home = () => {
             id: 1,
             nombre: "Costa Rica",
             descripcion: "Naturaleza y aventura",
-            imagen: "https://images.unsplash.com/photo-1518259102261-b40117eabbc9"
+            imagen: "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=900&q=80"
         },
         {
             id: 2,
@@ -56,6 +56,7 @@ export const Home = () => {
 
 
     return (
+
         <div className="home-page">
 
             {/* ============================= */}
@@ -82,7 +83,10 @@ export const Home = () => {
                     </div>
 
 
-                    <button className="profile-button">
+                    <button
+                        className="profile-button"
+                        onClick={() => cambiarPagina("perfil")}
+                    >
                         Mi perfil
                     </button>
 
@@ -105,9 +109,11 @@ export const Home = () => {
                             Tu próxima aventura empieza aquí
                         </span>
 
+
                         <h1>
                             Descubre nuevos destinos
                         </h1>
+
 
                         <p>
                             Encuentra lugares increíbles, organiza tus viajes
@@ -116,12 +122,14 @@ export const Home = () => {
 
 
                         {/* Buscador principal */}
+
                         <div className="hero-search">
 
                             <input
                                 type="text"
                                 placeholder="¿A dónde quieres viajar?"
                             />
+
 
                             <button>
                                 Buscar
@@ -143,11 +151,18 @@ export const Home = () => {
                     <div className="section-title">
 
                         <div>
-                            <h4>Destinos destacados</h4>
+
+                            <h4>
+                                Destinos destacados
+                            </h4>
+
+
                             <p>
                                 Algunos lugares que podrían interesarte
                             </p>
+
                         </div>
+
 
                         <button className="link-button">
                             Ver todos
@@ -170,11 +185,13 @@ export const Home = () => {
                                     alt={destino.nombre}
                                 />
 
+
                                 <div className="destino-card-info">
 
                                     <h5>
                                         {destino.nombre}
                                     </h5>
+
 
                                     <p>
                                         {destino.descripcion}
@@ -200,11 +217,18 @@ export const Home = () => {
                     <div className="section-title">
 
                         <div>
-                            <h4>Paquetes recomendados</h4>
+
+                            <h4>
+                                Paquetes recomendados
+                            </h4>
+
+
                             <p>
                                 Opciones para comenzar a planear tu viaje
                             </p>
+
                         </div>
+
 
                         <button className="link-button">
                             Ver todos
@@ -227,15 +251,18 @@ export const Home = () => {
                                     alt={paquete.nombre}
                                 />
 
+
                                 <div className="paquete-info">
 
                                     <span className="paquete-dias">
                                         {paquete.dias}
                                     </span>
 
+
                                     <h5>
                                         {paquete.nombre}
                                     </h5>
+
 
                                     <p>
                                         {paquete.destino}
@@ -250,11 +277,13 @@ export const Home = () => {
                                                 Desde
                                             </small>
 
+
                                             <strong>
                                                 ${paquete.precio}
                                             </strong>
 
                                         </div>
+
 
                                         <button>
                                             Ver detalles
@@ -285,20 +314,26 @@ export const Home = () => {
                     Inicio
                 </button>
 
+
                 <button>
                     Explorar
                 </button>
+
 
                 <button>
                     Mis viajes
                 </button>
 
-                <button>
+
+                <button
+                    onClick={() => cambiarPagina("perfil")}
+                >
                     Perfil
                 </button>
 
             </nav>
 
         </div>
+
     )
 }
