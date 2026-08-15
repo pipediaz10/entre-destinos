@@ -31,34 +31,126 @@ export const Home = () => {
     // DESTINOS
     // ==========================================
 
-    // Lista temporal de destinos.
-    // Más adelante estos datos pueden venir desde Firebase.
-    const destinos = [
-        {
-            id: 1,
-            nombre: "Costa Rica",
-            descripcion: "Naturaleza y aventura",
-            imagen: "https://images.unsplash.com/photo-1518259102261-b40117eabbc9"
-        },
-        {
-            id: 2,
-            nombre: "México",
-            descripcion: "Playas y cultura",
-            imagen: "https://images.unsplash.com/photo-1518638150340-f706e86654de"
-        },
-        {
-            id: 3,
-            nombre: "Perú",
-            descripcion: "Historia y montaña",
-            imagen: "https://images.unsplash.com/photo-1526392060635-9d6019884377"
-        },
-        {
-            id: 4,
-            nombre: "Dubái",
-            descripcion: "Ciudad y lujo",
-            imagen: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c"
-        }
-    ]
+// Lista de destinos con información para mostrar
+// cuando el usuario entra a cada destino.
+const destinos = [
+
+    {
+        id: 1,
+
+        nombre: "Costa Rica",
+
+        descripcion: "Naturaleza, playas y aventura",
+
+        imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSdUMGE43ewoAmW00TOx8qQGsTOu4WXvLT7M8wx1W7zohEahIEvy8Qvf35-&s=10",
+
+        resumen:
+            "Costa Rica es un destino ideal para quienes disfrutan de la naturaleza, las playas y las actividades al aire libre. Cuenta con volcanes, bosques, cataratas y una gran variedad de animales.",
+
+        clima:
+            "Tiene un clima tropical. Generalmente hay una época seca y una época lluviosa, aunque el clima puede cambiar dependiendo de la zona del país.",
+
+        cultura:
+            "Es conocido por la expresión Pura Vida, las fiestas patronales y comidas tradicionales como el gallo pinto, el casado y los tamales.",
+
+        actividades: [
+            "Visitar volcanes",
+            "Ir a la playa",
+            "Hacer canopy",
+            "Practicar surf",
+            "Conocer cataratas",
+            "Hacer senderismo"
+        ]
+    },
+
+
+    {
+        id: 2,
+
+        nombre: "México",
+
+        descripcion: "Playas, cultura y gastronomía",
+
+        imagen: "https://media.istockphoto.com/id/539002142/es/foto/el-centro-de-la-ciudad-de-m%C3%A9xico-en-el-crep%C3%BAsculo.jpg?s=612x612&w=0&k=20&c=PeNjZTlKhrT557mkHj3m8SPJ2DHdn8TQTgZpCAJAxtQ=",
+
+        resumen:
+            "México combina playas, ciudades, historia y gastronomía. Es un destino con una cultura muy variada y una gran cantidad de lugares históricos y turísticos.",
+
+        clima:
+            "El clima cambia dependiendo de la región. Las costas suelen ser más calientes y tropicales, mientras que algunas ciudades y zonas montañosas tienen temperaturas más frescas.",
+
+        cultura:
+            "Entre sus tradiciones destacan el Día de Muertos, la música mariachi y comidas como los tacos, tamales y enchiladas.",
+
+        actividades: [
+            "Visitar Cancún",
+            "Conocer sitios arqueológicos",
+            "Probar comida tradicional",
+            "Visitar playas",
+            "Recorrer ciudades históricas",
+            "Conocer mercados locales"
+        ]
+    },
+
+
+    {
+        id: 3,
+
+        nombre: "Perú",
+
+        descripcion: "Historia, montañas y cultura",
+
+        imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrTcPz3Mt-06hncSOlOB2TjbYqVoxXK9I8vgLvJg3nSQ&s=10",
+
+        resumen:
+            "Perú es conocido por su historia, sus montañas y la cultura inca. Tiene sitios históricos muy importantes, paisajes naturales y una gastronomía reconocida.",
+
+        clima:
+            "El clima es variado. La costa suele ser más seca, las zonas montañosas son más frías y la región amazónica tiene un clima tropical y húmedo.",
+
+        cultura:
+            "La cultura peruana tiene una fuerte influencia inca. También destacan sus danzas, artesanías y comidas como el ceviche y el lomo saltado.",
+
+        actividades: [
+            "Visitar Machu Picchu",
+            "Recorrer Cusco",
+            "Hacer caminatas",
+            "Conocer mercados",
+            "Probar comida peruana",
+            "Visitar sitios históricos"
+        ]
+    },
+
+
+    {
+        id: 4,
+
+        nombre: "Dubái",
+
+        descripcion: "Ciudad moderna, desierto y lujo",
+
+        imagen: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c",
+
+        resumen:
+            "Dubái es una ciudad de los Emiratos Árabes Unidos conocida por su arquitectura moderna, sus grandes edificios, playas y experiencias en el desierto.",
+
+        clima:
+            "Tiene un clima desértico. Gran parte del año es caliente y durante los meses de verano las temperaturas pueden ser bastante altas.",
+
+        cultura:
+            "Combina una ciudad muy moderna con tradiciones árabes. Se pueden encontrar mercados tradicionales, gastronomía local y costumbres propias de los Emiratos Árabes Unidos.",
+
+        actividades: [
+            "Visitar el Burj Khalifa",
+            "Hacer un tour por el desierto",
+            "Visitar mercados tradicionales",
+            "Ir a la playa",
+            "Conocer centros comerciales",
+            "Realizar paseos en camello"
+        ]
+    }
+
+]
 
 
     // ==========================================
@@ -111,6 +203,15 @@ const [pantalla, setPantalla] = useState("inicio")
 
 // Controla qué parte del perfil queremos ver
 const [seccionPerfil, setSeccionPerfil] = useState("mis-publicaciones")
+
+// Guarda lo que el usuario escribe en el buscador de Explorar
+const [busquedaExplorar, setBusquedaExplorar] = useState("")
+
+// Guarda el destino que el usuario seleccionó
+const [destinoSeleccionado, setDestinoSeleccionado] = useState(null)
+
+// Guarda desde qué pantalla entramos al destino
+const [pantallaAnterior, setPantallaAnterior] = useState("inicio")
 
 // Guarda qué publicación tiene abiertos los comentarios
 const [publicacionComentarioId, setPublicacionComentarioId] = useState(null)
@@ -527,6 +628,67 @@ const publicacionesGuardadas = publicaciones.filter(
             auth.currentUser?.uid
         )
 )
+// Esta función elimina tildes y convierte el texto a minúsculas.
+// Así "México" también se puede encontrar escribiendo "mexico".
+const normalizarTexto = (texto) => {
+
+    return texto
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+}
+
+
+// Limpiamos lo que escribe el usuario
+const textoBusqueda = normalizarTexto(
+    busquedaExplorar.trim()
+)
+
+
+// Filtramos los destinos
+const destinosExplorar = destinos.filter(
+    (destino) => {
+
+        return (
+            normalizarTexto(destino.nombre)
+                .includes(textoBusqueda) ||
+
+            normalizarTexto(destino.descripcion)
+                .includes(textoBusqueda)
+        )
+    }
+)
+
+
+// Filtramos las publicaciones
+const publicacionesExplorar = publicaciones.filter(
+    (publicacion) => {
+
+        const informacionPublicacion = normalizarTexto(`
+            ${publicacion.ubicacion || ""}
+            ${publicacion.descripcion || ""}
+            ${publicacion.usuario || ""}
+        `)
+
+        return informacionPublicacion.includes(
+            textoBusqueda
+        )
+    }
+)
+
+// Abre la pantalla con la información del destino
+const abrirDestino = (destino) => {
+
+    // Guardamos desde dónde entró el usuario
+    setPantallaAnterior(pantalla)
+
+    // Guardamos el destino seleccionado
+    setDestinoSeleccionado(destino)
+
+    // Cambiamos a la pantalla del destino
+    setPantalla("destino")
+}
+
     return (
         <div className="home-page">
 
@@ -652,9 +814,12 @@ const publicacionesGuardadas = publicaciones.filter(
                         {destinos.map((destino) => (
 
                             <div
-                                className="destino-card"
-                                key={destino.id}
-                            >
+    className="destino-card"
+    key={destino.id}
+    onClick={() =>
+        abrirDestino(destino)
+    }
+>
 
                                 <img
                                     src={destino.imagen}
@@ -1174,6 +1339,399 @@ const publicacionesGuardadas = publicaciones.filter(
 
             </main>
             )}
+
+            {/* ========================================= */}
+{/* PANTALLA EXPLORAR */}
+{/* ========================================= */}
+
+{pantalla === "explorar" && (
+
+    <main className="explore-page">
+
+
+        {/* Encabezado de Explorar */}
+        <section className="explore-header">
+
+            <span className="explore-small">
+                Explorar
+            </span>
+
+            <h2>
+                Encuentra tu próximo destino
+            </h2>
+
+            <p>
+                Busca destinos, lugares o experiencias
+                compartidas por otros viajeros.
+            </p>
+
+
+            {/* Buscador */}
+            <div className="explore-search">
+
+                <span>
+                    🔎
+                </span>
+
+                <input
+                    type="text"
+                    placeholder="Buscar Costa Rica, México, playa..."
+                    value={busquedaExplorar}
+                    onChange={(event) =>
+                        setBusquedaExplorar(
+                            event.target.value
+                        )
+                    }
+                />
+
+            </div>
+
+        </section>
+
+
+        {/* ================================= */}
+        {/* DESTINOS */}
+        {/* ================================= */}
+
+        <section className="home-section">
+
+            <div className="section-title">
+
+                <div>
+
+                    <h4>
+                        Destinos
+                    </h4>
+
+                    <p>
+                        Lugares que puedes descubrir
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            {destinosExplorar.length === 0 ? (
+
+                <div className="explore-empty">
+
+                    <p>
+                        No encontramos destinos con esa búsqueda.
+                    </p>
+
+                </div>
+
+            ) : (
+
+                <div className="destinos-grid">
+
+                    {destinosExplorar.map(
+                        (destino) => (
+
+                            <div
+    className="destino-card"
+    key={destino.id}
+    onClick={() =>
+        abrirDestino(destino)
+    }
+>
+
+                                <img
+                                    src={destino.imagen}
+                                    alt={destino.nombre}
+                                />
+
+                                <div className="destino-card-info">
+
+                                    <h5>
+                                        {destino.nombre}
+                                    </h5>
+
+                                    <p>
+                                        {destino.descripcion}
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        )
+                    )}
+
+                </div>
+
+            )}
+
+        </section>
+
+
+        {/* ================================= */}
+        {/* PUBLICACIONES PARA DESCUBRIR */}
+        {/* ================================= */}
+
+        <section className="home-section">
+
+            <div className="section-title">
+
+                <div>
+
+                    <h4>
+                        Experiencias de viajeros
+                    </h4>
+
+                    <p>
+                        Descubre lugares compartidos
+                        por la comunidad
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            {publicacionesExplorar.length === 0 ? (
+
+                <div className="explore-empty">
+
+                    <p>
+                        No encontramos publicaciones
+                        con esa búsqueda.
+                    </p>
+
+                </div>
+
+            ) : (
+
+                <div className="explore-post-grid">
+
+                    {publicacionesExplorar.map(
+                        (publicacion) => (
+
+                            <div
+                                className="explore-post-card"
+                                key={publicacion.id}
+                            >
+
+                                <img
+                                    src={publicacion.imagen}
+                                    alt={publicacion.ubicacion}
+                                />
+
+
+                                <div className="explore-post-info">
+
+
+                                    {/* Usuario */}
+                                    <div className="explore-user">
+
+                                        <div className="social-avatar">
+
+                                            {publicacion.usuario
+                                                ?.charAt(0)
+                                                .toUpperCase()}
+
+                                        </div>
+
+
+                                        <div>
+
+                                            <strong>
+                                                {publicacion.usuario}
+                                            </strong>
+
+                                            <span>
+                                                📍 {publicacion.ubicacion}
+                                            </span>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    {/* Descripción */}
+                                    <p>
+                                        {publicacion.descripcion}
+                                    </p>
+
+
+                                    {/* Información de la publicación */}
+                                    <span className="explore-post-stats">
+
+                                        ♥ {publicacion.likes || 0}
+                                        {" · "}
+                                        💬 {publicacion.comentarios || 0}
+
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        )
+                    )}
+
+                </div>
+
+            )}
+
+        </section>
+
+    </main>
+
+)}
+
+
+{/* ========================================= */}
+{/* INFORMACIÓN DEL DESTINO */}
+{/* ========================================= */}
+
+{pantalla === "destino" && destinoSeleccionado && (
+
+    <main className="destination-detail-page">
+
+
+        {/* Botón para regresar */}
+        <button
+            className="destination-back"
+            onClick={() =>
+                setPantalla(pantallaAnterior)
+            }
+        >
+            ← Volver
+        </button>
+
+
+        {/* Información principal */}
+        <section className="destination-detail-card">
+
+
+            {/* Imagen del destino */}
+            <img
+                src={destinoSeleccionado.imagen}
+                alt={destinoSeleccionado.nombre}
+                className="destination-detail-image"
+            />
+
+
+            <div className="destination-detail-info">
+
+                <span className="destination-small">
+                    Destino
+                </span>
+
+                <h1>
+                    {destinoSeleccionado.nombre}
+                </h1>
+
+                <p>
+                    {destinoSeleccionado.descripcion}
+                </p>
+
+
+                {/* Resumen del destino */}
+<p className="destination-summary">
+
+    {destinoSeleccionado.resumen}
+
+</p>
+
+
+{/* Información del destino */}
+<div className="destination-travel-info">
+
+
+    {/* Clima */}
+    <div className="destination-travel-card">
+
+        <h4>
+            ☀️ Clima
+        </h4>
+
+        <p>
+            {destinoSeleccionado.clima}
+        </p>
+
+    </div>
+
+
+    {/* Cultura */}
+    <div className="destination-travel-card">
+
+        <h4>
+            🎭 Cultura y tradiciones
+        </h4>
+
+        <p>
+            {destinoSeleccionado.cultura}
+        </p>
+
+    </div>
+
+
+    {/* Actividades */}
+    <div className="destination-travel-card">
+
+        <h4>
+            🧳 ¿Qué puedes hacer?
+        </h4>
+
+
+        <div className="destination-activities">
+
+            {destinoSeleccionado.actividades?.map(
+                (actividad, index) => (
+
+                    <span key={index}>
+                        {actividad}
+                    </span>
+
+                )
+            )}
+
+        </div>
+
+    </div>
+
+</div>
+
+            </div>
+
+        </section>
+
+
+        {/* Sección inferior */}
+        <section className="destination-extra">
+
+            <h3>
+                Descubre {destinoSeleccionado.nombre}
+            </h3>
+
+            <p>
+                Encuentra experiencias de otros viajeros,
+                lugares interesantes y opciones para comenzar
+                a planear tu viaje.
+            </p>
+
+
+            <button
+                onClick={() => {
+                    setBusquedaExplorar(
+                        destinoSeleccionado.nombre
+                    )
+
+                    setPantalla("explorar")
+                }}
+            >
+                Ver experiencias
+            </button>
+
+        </section>
+
+    </main>
+
+)}
+
 {/* ========================================= */}
 {/* PERFIL DEL USUARIO */}
 {/* ========================================= */}
@@ -1455,9 +2013,18 @@ const publicacionesGuardadas = publicaciones.filter(
     Inicio
 </button>
 
-                <button>
-                    Explorar
-                </button>
+                <button
+    className={
+        pantalla === "explorar"
+            ? "menu-activo"
+            : ""
+    }
+    onClick={() =>
+        setPantalla("explorar")
+    }
+>
+    Explorar
+</button>
 
                 <button>
                     Comunidad
