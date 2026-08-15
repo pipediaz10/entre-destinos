@@ -4,6 +4,8 @@ import { initializeApp } from "firebase/app"
 // Importamos Authentication para crear e iniciar usuarios
 import { getAuth } from "firebase/auth"
 
+// Firestore se utiliza para guardar información de la aplicación
+import { getFirestore } from "firebase/firestore"
 
 // Configuración de nuestro proyecto Entre Destinos
 const firebaseConfig = {
@@ -22,3 +24,6 @@ const app = initializeApp(firebaseConfig)
 
 // Exportamos Authentication para utilizarlo en Register.jsx y Login.jsx
 export const auth = getAuth(app)
+
+// Iniciamos Firestore
+export const db = getFirestore(app)

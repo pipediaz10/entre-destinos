@@ -4,7 +4,8 @@ import { useState } from "react"
 // Funciones de Firebase para crear usuario y cerrar la sesión automática
 import {
     createUserWithEmailAndPassword,
-    signOut
+    signOut,
+    updateProfile
 } from "firebase/auth"
 
 // Importamos la autenticación que configuramos en firebase.js
@@ -56,12 +57,22 @@ export const Register = ({ setPantalla }) => {
 
         try {
 
-            // Firebase crea la cuenta utilizando correo y contraseña
-            await createUserWithEmailAndPassword(
-                auth,
-                correo,
-                contrasena
-            )
+            // Creamos el usuario en Firebase
+const usuarioCreado = await createUserWithEmailAndPassword(
+    auth,
+    correo,
+    contrasena
+)
+
+
+// Guardamos también el nombre escrito en el formulario
+await updateProfile(usuarioCreado.user, {
+    displayName: nombre
+})
+
+
+// Cerramos la sesión para que después entre desde Login
+await signOut(auth)
 
 
             // Firebase inicia sesión automáticamente cuando crea la cuenta.
