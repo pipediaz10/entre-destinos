@@ -22,6 +22,7 @@ import { auth, db } from "../firebase"
 
 // Logo de Entre Destinos
 import logo from "../assets/logo.png"
+import { Profile } from "./Profile"
 
 
 
@@ -191,6 +192,62 @@ const [ubicacion, setUbicacion] = useState("")
 const [descripcion, setDescripcion] = useState("")
 const [imagen, setImagen] = useState("")
 
+// Abre los archivos del dispositivo y prepara la foto para Firebase
+const seleccionarImagen = (event) => {
+
+    const archivo = event.target.files[0]
+
+    if (!archivo) {
+        return
+    }
+
+    if (!archivo.type.startsWith("image/")) {
+        setMensajePublicacion("Selecciona un archivo de imagen")
+        return
+    }
+
+    const lector = new FileReader()
+
+    lector.onload = () => {
+
+        const foto = new Image()
+
+        foto.onload = () => {
+
+            const tamañoMaximo = 900
+            let ancho = foto.width
+            let alto = foto.height
+
+            if (ancho > alto && ancho > tamañoMaximo) {
+                alto = Math.round((alto * tamañoMaximo) / ancho)
+                ancho = tamañoMaximo
+            } else if (alto > tamañoMaximo) {
+                ancho = Math.round((ancho * tamañoMaximo) / alto)
+                alto = tamañoMaximo
+            }
+
+            const canvas = document.createElement("canvas")
+            canvas.width = ancho
+            canvas.height = alto
+
+            const contexto = canvas.getContext("2d")
+            contexto.drawImage(foto, 0, 0, ancho, alto)
+
+            const imagenPreparada = canvas.toDataURL(
+                "image/jpeg",
+                0.7
+            )
+
+            setImagen(imagenPreparada)
+            setMensajePublicacion("Foto seleccionada correctamente")
+        }
+
+        foto.src = lector.result
+    }
+
+    lector.readAsDataURL(archivo)
+}
+
 
 // Mensaje para indicar si se publicó correctamente
 const [mensajePublicacion, setMensajePublicacion] = useState("")
@@ -200,9 +257,6 @@ const [mostrarFormulario, setMostrarFormulario] = useState(false)
 
 // Controla si estamos viendo Inicio o Perfil
 const [pantalla, setPantalla] = useState("inicio")
-
-// Controla qué parte del perfil queremos ver
-const [seccionPerfil, setSeccionPerfil] = useState("mis-publicaciones")
 
 // Guarda lo que el usuario escribe en el buscador de Explorar
 const [busquedaExplorar, setBusquedaExplorar] = useState("")
@@ -361,9 +415,6 @@ const crearPublicacion = async (event) => {
                 // Usuarios que dieron Me gusta
                 usuariosLike: [],
 
-                // Usuarios que guardaron la publicación
-usuariosGuardaron: [],
-
 // Lista de comentarios de la publicación
 listaComentarios: [],
 
@@ -447,7 +498,10 @@ const cambiarLike = async (publicacion) => {
                     usuarioActual.uid
                 ),
 
-                likes: publicacion.likes - 1
+                likes: Math.max(
+                    (publicacion.likes || 0) - 1,
+                    0
+                )
             })
 
         } else {
@@ -459,7 +513,7 @@ const cambiarLike = async (publicacion) => {
                     usuarioActual.uid
                 ),
 
-                likes: publicacion.likes + 1
+                likes: (publicacion.likes || 0) + 1
             })
         }
 
@@ -548,86 +602,6 @@ const agregarComentario = async (publicacion) => {
 }
 
 
-// ==========================================
-// GUARDAR PUBLICACIÓN
-// ==========================================
-
-const cambiarGuardado = async (publicacion) => {
-
-    const usuarioActual = auth.currentUser
-
-    if (!usuarioActual) {
-        return
-    }
-
-
-    try {
-
-        const publicacionRef = doc(
-            db,
-            "publicaciones",
-            publicacion.id
-        )
-
-
-        // Revisamos si el usuario ya la había guardado
-        const yaGuardada =
-            publicacion.usuariosGuardaron?.includes(
-                usuarioActual.uid
-            )
-
-
-        if (yaGuardada) {
-
-            // Quitamos la publicación de guardados
-            await updateDoc(publicacionRef, {
-
-                usuariosGuardaron: arrayRemove(
-                    usuarioActual.uid
-                )
-            })
-
-        } else {
-
-            // Guardamos la publicación
-            await updateDoc(publicacionRef, {
-
-                usuariosGuardaron: arrayUnion(
-                    usuarioActual.uid
-                )
-            })
-        }
-
-
-        // Actualizamos la pantalla
-        await cargarPublicaciones()
-
-    } catch (error) {
-
-        console.error(
-            "Error guardando publicación:",
-            error
-        )
-    }
-}
-// ==========================================
-// PUBLICACIONES DEL PERFIL
-// ==========================================
-
-// Publicaciones creadas por el usuario conectado
-const misPublicaciones = publicaciones.filter(
-    (publicacion) =>
-        publicacion.uid === auth.currentUser?.uid
-)
-
-
-// Publicaciones que el usuario guardó
-const publicacionesGuardadas = publicaciones.filter(
-    (publicacion) =>
-        publicacion.usuariosGuardaron?.includes(
-            auth.currentUser?.uid
-        )
-)
 // Esta función elimina tildes y convierte el texto a minúsculas.
 // Así "México" también se puede encontrar escribiendo "mexico".
 const normalizarTexto = (texto) => {
@@ -983,7 +957,7 @@ const abrirDestino = (destino) => {
         </div>
 
 
-        {/* Foto por URL por ahora */}
+        {/* Foto seleccionada desde el dispositivo */}
         <div className="campo-publicacion">
 
             <label>
@@ -991,13 +965,24 @@ const abrirDestino = (destino) => {
             </label>
 
             <input
-                type="text"
-                placeholder="Pega el enlace de una fotografía"
-                value={imagen}
-                onChange={(event) =>
-                    setImagen(event.target.value)
-                }
+                type="file"
+                accept="image/*"
+                onChange={seleccionarImagen}
             />
+
+            {imagen && (
+                <img
+                    src={imagen}
+                    alt="Vista previa"
+                    style={{
+                        width: "100%",
+                        maxHeight: "280px",
+                        marginTop: "12px",
+                        borderRadius: "12px",
+                        objectFit: "cover"
+                    }}
+                />
+            )}
 
         </div>
 
@@ -1132,24 +1117,7 @@ const abrirDestino = (destino) => {
         }
     }}
 >
-    💬 Comentar
-</button>
-
-
-{/* Guardar o quitar de guardados */}
-<button
-    onClick={() =>
-        cambiarGuardado(publicacion)
-    }
->
-
-    {publicacion.usuariosGuardaron?.includes(
-        auth.currentUser?.uid
-    )
-        ? "✓ Guardado"
-        : "Guardar"
-    }
-
+    💬 {publicacion.listaComentarios?.length || 0} comentarios
 </button>
 
                                 </div>
@@ -1219,7 +1187,7 @@ const abrirDestino = (destino) => {
                                 <div className="social-post-info">
 
                                     <strong>
-                                        {publicacion.likes} Me gusta
+                                        {publicacion.usuariosLike?.length || 0} Me gusta
                                     </strong>
 
 
@@ -1235,12 +1203,6 @@ const abrirDestino = (destino) => {
 
                                     </p>
 
-
-                                    <button className="social-comments">
-
-                                        Ver los {publicacion.comentarios} comentarios
-
-                                    </button>
 
                                 </div>
 
@@ -1738,259 +1700,23 @@ const abrirDestino = (destino) => {
 
 {pantalla === "perfil" && (
 
-    <main className="profile-page">
-
-        {/* Parte superior del perfil */}
-        <section className="profile-header-card">
-
-            <div className="profile-avatar-large">
-
-                {auth.currentUser?.displayName
-                    ?.charAt(0)
-                    .toUpperCase() ||
-                    auth.currentUser?.email
-                        ?.charAt(0)
-                        .toUpperCase()
-                }
-
-            </div>
-
-
-            <div className="profile-main-info">
-
-                <h2>
-                    {auth.currentUser?.displayName ||
-                        auth.currentUser?.email}
-                </h2>
-
-                <span>
-                    Viajero en Entre Destinos
-                </span>
-
-
-                <div className="profile-stats">
-
-                    <div>
-                        <strong>
-                            {misPublicaciones.length}
-                        </strong>
-
-                        <span>
-                            Publicaciones
-                        </span>
-                    </div>
-
-
-                    <div>
-                        <strong>
-                            {publicacionesGuardadas.length}
-                        </strong>
-
-                        <span>
-                            Guardados
-                        </span>
-                    </div>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        {/* Pestañas del perfil */}
-        <div className="profile-tabs">
-
-            <button
-                className={
-                    seccionPerfil === "mis-publicaciones"
-                        ? "profile-tab-active"
-                        : ""
-                }
-                onClick={() =>
-                    setSeccionPerfil("mis-publicaciones")
-                }
-            >
-                Mis publicaciones
-            </button>
-
-
-            <button
-                className={
-                    seccionPerfil === "guardados"
-                        ? "profile-tab-active"
-                        : ""
-                }
-                onClick={() =>
-                    setSeccionPerfil("guardados")
-                }
-            >
-                Guardados
-            </button>
-
-        </div>
-
-
-        {/* ================================= */}
-        {/* MIS PUBLICACIONES */}
-        {/* ================================= */}
-
-        {seccionPerfil === "mis-publicaciones" && (
-
-            <div className="profile-post-grid">
-
-                {misPublicaciones.length === 0 ? (
-
-                    <div className="profile-empty">
-
-                        <h4>
-                            Todavía no tienes publicaciones
-                        </h4>
-
-                        <p>
-                            Comparte algún viaje con la comunidad.
-                        </p>
-
-                    </div>
-
-                ) : (
-
-                    misPublicaciones.map((publicacion) => (
-
-                        <div
-                            className="profile-post-card"
-                            key={publicacion.id}
-                        >
-
-                            <img
-                                src={publicacion.imagen}
-                                alt={publicacion.ubicacion}
-                            />
-
-
-                            <div className="profile-post-card-info">
-
-                                <strong>
-                                    📍 {publicacion.ubicacion}
-                                </strong>
-
-                                <p>
-                                    {publicacion.descripcion}
-                                </p>
-
-                                <span>
-                                    ♥ {publicacion.likes || 0} Me gusta
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                    ))
-
-                )}
-
-            </div>
-
-        )}
-
-
-        {/* ================================= */}
-        {/* PUBLICACIONES GUARDADAS */}
-        {/* ================================= */}
-
-        {seccionPerfil === "guardados" && (
-
-            <div className="profile-post-grid">
-
-                {publicacionesGuardadas.length === 0 ? (
-
-                    <div className="profile-empty">
-
-                        <h4>
-                            No tienes publicaciones guardadas
-                        </h4>
-
-                        <p>
-                            Usa el botón Guardar en las publicaciones que te gusten.
-                        </p>
-
-                    </div>
-
-                ) : (
-
-                    publicacionesGuardadas.map(
-                        (publicacion) => (
-
-                            <div
-                                className="profile-post-card"
-                                key={publicacion.id}
-                            >
-
-                                <img
-                                    src={publicacion.imagen}
-                                    alt={publicacion.ubicacion}
-                                />
-
-
-                                <div className="profile-post-card-info">
-
-                                    <div className="saved-user">
-
-                                        <div className="social-avatar">
-
-                                            {publicacion.usuario
-                                                ?.charAt(0)
-                                                .toUpperCase()}
-
-                                        </div>
-
-
-                                        <div>
-
-                                            <strong>
-                                                {publicacion.usuario}
-                                            </strong>
-
-                                            <span>
-                                                📍 {publicacion.ubicacion}
-                                            </span>
-
-                                        </div>
-
-                                    </div>
-
-
-                                    <p>
-                                        {publicacion.descripcion}
-                                    </p>
-
-
-                                    <button
-                                        className="remove-saved"
-                                        onClick={() =>
-                                            cambiarGuardado(
-                                                publicacion
-                                            )
-                                        }
-                                    >
-                                        Quitar de guardados
-                                    </button>
-
-                                </div>
-
-                            </div>
-
-                        )
-                    )
-
-                )}
-
-            </div>
-
-        )}
-
-    </main>
+    <Profile
+        publicaciones={publicaciones}
+        recargarPublicaciones={cargarPublicaciones}
+        onCompartir={() => {
+            setPantalla("inicio")
+            setMostrarFormulario(true)
+
+            setTimeout(() => {
+                document
+                    .querySelector(".real-post-form")
+                    ?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center"
+                    })
+            }, 100)
+        }}
+    />
 
 )}
 
