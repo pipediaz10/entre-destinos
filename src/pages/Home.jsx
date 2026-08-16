@@ -1,38 +1,161 @@
-// Importamos el logo de Entre Destinos
+// useState guarda información que cambia.
+// useEffect ejecuta una función cuando abrimos el Home.
+import { useEffect, useState } from "react"
+
+// Funciones que utilizaremos de Firestore
+import {
+    addDoc,
+    arrayRemove,
+    arrayUnion,
+    collection,
+    doc,
+    getDocs,
+    orderBy,
+    query,
+    serverTimestamp,
+    updateDoc
+} from "firebase/firestore"
+
+// Authentication nos permite saber quién está conectado.
+// Firestore guarda las publicaciones.
+import { auth, db } from "../firebase"
+
+// Logo de Entre Destinos
 import logo from "../assets/logo.png"
 
 
-export const Home = ({ cambiarPagina }) => {
 
-    // Lista temporal de destinos.
-    // Más adelante estos datos pueden venir desde Firebase.
-    const destinos = [
-        {
-            id: 1,
-            nombre: "Costa Rica",
-            descripcion: "Naturaleza y aventura",
-            imagen: "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=900&q=80"
-        },
-        {
-            id: 2,
-            nombre: "México",
-            descripcion: "Playas y cultura",
-            imagen: "https://images.unsplash.com/photo-1518638150340-f706e86654de"
-        },
-        {
-            id: 3,
-            nombre: "Perú",
-            descripcion: "Historia y montaña",
-            imagen: "https://images.unsplash.com/photo-1526392060635-9d6019884377"
-        },
-        {
-            id: 4,
-            nombre: "Dubái",
-            descripcion: "Ciudad y lujo",
-            imagen: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c"
-        }
-    ]
+export const Home = () => {
 
+    // ==========================================
+    // DESTINOS
+    // ==========================================
+
+// Lista de destinos con información para mostrar
+// cuando el usuario entra a cada destino.
+const destinos = [
+
+    {
+        id: 1,
+
+        nombre: "Costa Rica",
+
+        descripcion: "Naturaleza, playas y aventura",
+
+        imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSdUMGE43ewoAmW00TOx8qQGsTOu4WXvLT7M8wx1W7zohEahIEvy8Qvf35-&s=10",
+
+        resumen:
+            "Costa Rica es un destino ideal para quienes disfrutan de la naturaleza, las playas y las actividades al aire libre. Cuenta con volcanes, bosques, cataratas y una gran variedad de animales.",
+
+        clima:
+            "Tiene un clima tropical. Generalmente hay una época seca y una época lluviosa, aunque el clima puede cambiar dependiendo de la zona del país.",
+
+        cultura:
+            "Es conocido por la expresión Pura Vida, las fiestas patronales y comidas tradicionales como el gallo pinto, el casado y los tamales.",
+
+        actividades: [
+            "Visitar volcanes",
+            "Ir a la playa",
+            "Hacer canopy",
+            "Practicar surf",
+            "Conocer cataratas",
+            "Hacer senderismo"
+        ]
+    },
+
+
+    {
+        id: 2,
+
+        nombre: "México",
+
+        descripcion: "Playas, cultura y gastronomía",
+
+        imagen: "https://media.istockphoto.com/id/539002142/es/foto/el-centro-de-la-ciudad-de-m%C3%A9xico-en-el-crep%C3%BAsculo.jpg?s=612x612&w=0&k=20&c=PeNjZTlKhrT557mkHj3m8SPJ2DHdn8TQTgZpCAJAxtQ=",
+
+        resumen:
+            "México combina playas, ciudades, historia y gastronomía. Es un destino con una cultura muy variada y una gran cantidad de lugares históricos y turísticos.",
+
+        clima:
+            "El clima cambia dependiendo de la región. Las costas suelen ser más calientes y tropicales, mientras que algunas ciudades y zonas montañosas tienen temperaturas más frescas.",
+
+        cultura:
+            "Entre sus tradiciones destacan el Día de Muertos, la música mariachi y comidas como los tacos, tamales y enchiladas.",
+
+        actividades: [
+            "Visitar Cancún",
+            "Conocer sitios arqueológicos",
+            "Probar comida tradicional",
+            "Visitar playas",
+            "Recorrer ciudades históricas",
+            "Conocer mercados locales"
+        ]
+    },
+
+
+    {
+        id: 3,
+
+        nombre: "Perú",
+
+        descripcion: "Historia, montañas y cultura",
+
+        imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrTcPz3Mt-06hncSOlOB2TjbYqVoxXK9I8vgLvJg3nSQ&s=10",
+
+        resumen:
+            "Perú es conocido por su historia, sus montañas y la cultura inca. Tiene sitios históricos muy importantes, paisajes naturales y una gastronomía reconocida.",
+
+        clima:
+            "El clima es variado. La costa suele ser más seca, las zonas montañosas son más frías y la región amazónica tiene un clima tropical y húmedo.",
+
+        cultura:
+            "La cultura peruana tiene una fuerte influencia inca. También destacan sus danzas, artesanías y comidas como el ceviche y el lomo saltado.",
+
+        actividades: [
+            "Visitar Machu Picchu",
+            "Recorrer Cusco",
+            "Hacer caminatas",
+            "Conocer mercados",
+            "Probar comida peruana",
+            "Visitar sitios históricos"
+        ]
+    },
+
+
+    {
+        id: 4,
+
+        nombre: "Dubái",
+
+        descripcion: "Ciudad moderna, desierto y lujo",
+
+        imagen: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c",
+
+        resumen:
+            "Dubái es una ciudad de los Emiratos Árabes Unidos conocida por su arquitectura moderna, sus grandes edificios, playas y experiencias en el desierto.",
+
+        clima:
+            "Tiene un clima desértico. Gran parte del año es caliente y durante los meses de verano las temperaturas pueden ser bastante altas.",
+
+        cultura:
+            "Combina una ciudad muy moderna con tradiciones árabes. Se pueden encontrar mercados tradicionales, gastronomía local y costumbres propias de los Emiratos Árabes Unidos.",
+
+        actividades: [
+            "Visitar el Burj Khalifa",
+            "Hacer un tour por el desierto",
+            "Visitar mercados tradicionales",
+            "Ir a la playa",
+            "Conocer centros comerciales",
+            "Realizar paseos en camello"
+        ]
+    }
+
+]
+
+
+    // ==========================================
+    // PAQUETES
+    // ==========================================
 
     // Paquetes turísticos temporales.
     const paquetes = [
@@ -55,9 +178,520 @@ export const Home = ({ cambiarPagina }) => {
     ]
 
 
-    return (
+   // ==========================================
+// PUBLICACIONES REALES
+// ==========================================
 
+// Aquí guardamos las publicaciones que vienen de Firebase
+const [publicaciones, setPublicaciones] = useState([])
+
+
+// Datos para crear una nueva publicación
+const [ubicacion, setUbicacion] = useState("")
+const [descripcion, setDescripcion] = useState("")
+const [imagen, setImagen] = useState("")
+
+
+// Mensaje para indicar si se publicó correctamente
+const [mensajePublicacion, setMensajePublicacion] = useState("")
+
+// Controla si el formulario para publicar está abierto o cerrado
+const [mostrarFormulario, setMostrarFormulario] = useState(false)
+
+// Controla si estamos viendo Inicio o Perfil
+const [pantalla, setPantalla] = useState("inicio")
+
+// Controla qué parte del perfil queremos ver
+const [seccionPerfil, setSeccionPerfil] = useState("mis-publicaciones")
+
+// Guarda lo que el usuario escribe en el buscador de Explorar
+const [busquedaExplorar, setBusquedaExplorar] = useState("")
+
+// Guarda el destino que el usuario seleccionó
+const [destinoSeleccionado, setDestinoSeleccionado] = useState(null)
+
+// Guarda desde qué pantalla entramos al destino
+const [pantallaAnterior, setPantallaAnterior] = useState("inicio")
+
+// Guarda qué publicación tiene abiertos los comentarios
+const [publicacionComentarioId, setPublicacionComentarioId] = useState(null)
+
+// Guarda lo que escribe el usuario en el comentario
+const [comentarioTexto, setComentarioTexto] = useState("")
+
+// ==========================================
+// CARGAR PUBLICACIONES
+// ==========================================
+
+const cargarPublicaciones = async () => {
+
+    try {
+
+        const consulta = query(
+            collection(db, "publicaciones"),
+            orderBy("fecha", "desc")
+        )
+
+        const resultado = await getDocs(consulta)
+
+        const lista = resultado.docs.map((documento) => ({
+            id: documento.id,
+            ...documento.data()
+        }))
+
+        setPublicaciones(lista)
+
+    } catch (error) {
+
+        console.error(
+            "Error cargando publicaciones:",
+            error
+        )
+    }
+}
+// ==========================================
+// CARGAR PUBLICACIONES AL ABRIR EL HOME
+// ==========================================
+
+// Cuando abrimos el Home cargamos las publicaciones
+useEffect(() => {
+
+    const obtenerPublicaciones = async () => {
+
+        try {
+
+            // Buscamos las publicaciones en Firebase
+            const consulta = query(
+                collection(db, "publicaciones"),
+                orderBy("fecha", "desc")
+            )
+
+            const resultado = await getDocs(consulta)
+
+            // Convertimos los datos en un arreglo
+            const lista = resultado.docs.map((documento) => ({
+                id: documento.id,
+                ...documento.data()
+            }))
+
+            // Guardamos las publicaciones
+            setPublicaciones(lista)
+
+        } catch (error) {
+
+            console.error(
+                "Error cargando publicaciones:",
+                error
+            )
+        }
+    }
+
+
+    obtenerPublicaciones()
+
+}, [])
+
+
+// ==========================================
+// CREAR PUBLICACIÓN
+// ==========================================
+
+// ==========================================
+// CREAR PUBLICACIÓN
+// ==========================================
+
+const crearPublicacion = async (event) => {
+
+    // Evitamos que la página se recargue
+    event.preventDefault()
+
+    // Limpiamos mensajes anteriores
+    setMensajePublicacion("")
+
+    // Obtenemos el usuario que inició sesión
+    const usuarioActual = auth.currentUser
+
+
+    // Verificamos que exista un usuario conectado
+    if (!usuarioActual) {
+
+        setMensajePublicacion(
+            "Debes iniciar sesión para publicar"
+        )
+
+        return
+    }
+
+
+    // Revisamos que todos los campos estén completos
+    if (
+        ubicacion.trim() === "" ||
+        descripcion.trim() === "" ||
+        imagen.trim() === ""
+    ) {
+
+        setMensajePublicacion(
+            "Completa todos los campos"
+        )
+
+        return
+    }
+
+
+    try {
+
+        // Guardamos la publicación en Firebase
+        await addDoc(
+            collection(db, "publicaciones"),
+            {
+                uid: usuarioActual.uid,
+
+                usuario:
+                    usuarioActual.displayName ||
+                    usuarioActual.email,
+
+                ubicacion: ubicacion,
+
+                descripcion: descripcion,
+
+                imagen: imagen,
+
+                likes: 0,
+
+                // Usuarios que dieron Me gusta
+                usuariosLike: [],
+
+                // Usuarios que guardaron la publicación
+usuariosGuardaron: [],
+
+// Lista de comentarios de la publicación
+listaComentarios: [],
+
+                comentarios: 0,
+
+                fecha: serverTimestamp()
+            }
+        )
+
+
+        // Limpiamos los campos
+        setUbicacion("")
+        setDescripcion("")
+        setImagen("")
+
+
+        setMensajePublicacion(
+            "Publicación creada correctamente"
+        )
+
+
+        // Cerramos el formulario
+        setMostrarFormulario(false)
+
+
+        // Volvemos a cargar las publicaciones
+        await cargarPublicaciones()
+
+    } catch (error) {
+
+        console.error(
+            "Error creando publicación:",
+            error
+        )
+
+        setMensajePublicacion(
+            "No se pudo crear la publicación"
+        )
+    }
+}
+
+
+// ==========================================
+// DAR O QUITAR ME GUSTA
+// ==========================================
+
+const cambiarLike = async (publicacion) => {
+
+    // Usuario conectado actualmente
+    const usuarioActual = auth.currentUser
+
+
+    if (!usuarioActual) {
+        return
+    }
+
+
+    try {
+
+        // Buscamos la publicación en Firebase
+        const publicacionRef = doc(
+            db,
+            "publicaciones",
+            publicacion.id
+        )
+
+
+        // Revisamos si este usuario ya dio Me gusta
+        const yaDioLike =
+            publicacion.usuariosLike?.includes(
+                usuarioActual.uid
+            )
+
+
+        // Si ya había dado like, lo quitamos
+        if (yaDioLike) {
+
+            await updateDoc(publicacionRef, {
+
+                usuariosLike: arrayRemove(
+                    usuarioActual.uid
+                ),
+
+                likes: publicacion.likes - 1
+            })
+
+        } else {
+
+            // Si no había dado like, lo agregamos
+            await updateDoc(publicacionRef, {
+
+                usuariosLike: arrayUnion(
+                    usuarioActual.uid
+                ),
+
+                likes: publicacion.likes + 1
+            })
+        }
+
+
+        // Actualizamos las publicaciones
+        await cargarPublicaciones()
+
+    } catch (error) {
+
+        console.error(
+            "Error actualizando el like:",
+            error
+        )
+    }
+}
+// ==========================================
+// AGREGAR COMENTARIO
+// ==========================================
+
+const agregarComentario = async (publicacion) => {
+
+    const usuarioActual = auth.currentUser
+
+    // Revisamos que haya un usuario conectado
+    if (!usuarioActual) {
+        return
+    }
+
+    // No permitimos comentarios vacíos
+    if (comentarioTexto.trim() === "") {
+        return
+    }
+
+    try {
+
+        // Buscamos la publicación en Firebase
+        const publicacionRef = doc(
+            db,
+            "publicaciones",
+            publicacion.id
+        )
+
+
+        // Creamos el comentario
+        const nuevoComentario = {
+
+            uid: usuarioActual.uid,
+
+            usuario:
+                usuarioActual.displayName ||
+                usuarioActual.email,
+
+            texto: comentarioTexto,
+
+            // Guardamos una fecha sencilla
+            fecha: Date.now()
+        }
+
+
+        // Actualizamos la publicación
+        await updateDoc(publicacionRef, {
+
+            listaComentarios: arrayUnion(
+                nuevoComentario
+            ),
+
+            comentarios:
+                (publicacion.comentarios || 0) + 1
+        })
+
+
+        // Limpiamos el campo
+        setComentarioTexto("")
+
+
+        // Volvemos a cargar las publicaciones
+        await cargarPublicaciones()
+
+    } catch (error) {
+
+        console.error(
+            "Error agregando comentario:",
+            error
+        )
+    }
+}
+
+
+// ==========================================
+// GUARDAR PUBLICACIÓN
+// ==========================================
+
+const cambiarGuardado = async (publicacion) => {
+
+    const usuarioActual = auth.currentUser
+
+    if (!usuarioActual) {
+        return
+    }
+
+
+    try {
+
+        const publicacionRef = doc(
+            db,
+            "publicaciones",
+            publicacion.id
+        )
+
+
+        // Revisamos si el usuario ya la había guardado
+        const yaGuardada =
+            publicacion.usuariosGuardaron?.includes(
+                usuarioActual.uid
+            )
+
+
+        if (yaGuardada) {
+
+            // Quitamos la publicación de guardados
+            await updateDoc(publicacionRef, {
+
+                usuariosGuardaron: arrayRemove(
+                    usuarioActual.uid
+                )
+            })
+
+        } else {
+
+            // Guardamos la publicación
+            await updateDoc(publicacionRef, {
+
+                usuariosGuardaron: arrayUnion(
+                    usuarioActual.uid
+                )
+            })
+        }
+
+
+        // Actualizamos la pantalla
+        await cargarPublicaciones()
+
+    } catch (error) {
+
+        console.error(
+            "Error guardando publicación:",
+            error
+        )
+    }
+}
+// ==========================================
+// PUBLICACIONES DEL PERFIL
+// ==========================================
+
+// Publicaciones creadas por el usuario conectado
+const misPublicaciones = publicaciones.filter(
+    (publicacion) =>
+        publicacion.uid === auth.currentUser?.uid
+)
+
+
+// Publicaciones que el usuario guardó
+const publicacionesGuardadas = publicaciones.filter(
+    (publicacion) =>
+        publicacion.usuariosGuardaron?.includes(
+            auth.currentUser?.uid
+        )
+)
+// Esta función elimina tildes y convierte el texto a minúsculas.
+// Así "México" también se puede encontrar escribiendo "mexico".
+const normalizarTexto = (texto) => {
+
+    return texto
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+}
+
+
+// Limpiamos lo que escribe el usuario
+const textoBusqueda = normalizarTexto(
+    busquedaExplorar.trim()
+)
+
+
+// Filtramos los destinos
+const destinosExplorar = destinos.filter(
+    (destino) => {
+
+        return (
+            normalizarTexto(destino.nombre)
+                .includes(textoBusqueda) ||
+
+            normalizarTexto(destino.descripcion)
+                .includes(textoBusqueda)
+        )
+    }
+)
+
+
+// Filtramos las publicaciones
+const publicacionesExplorar = publicaciones.filter(
+    (publicacion) => {
+
+        const informacionPublicacion = normalizarTexto(`
+            ${publicacion.ubicacion || ""}
+            ${publicacion.descripcion || ""}
+            ${publicacion.usuario || ""}
+        `)
+
+        return informacionPublicacion.includes(
+            textoBusqueda
+        )
+    }
+)
+
+// Abre la pantalla con la información del destino
+const abrirDestino = (destino) => {
+
+    // Guardamos desde dónde entró el usuario
+    setPantallaAnterior(pantalla)
+
+    // Guardamos el destino seleccionado
+    setDestinoSeleccionado(destino)
+
+    // Cambiamos a la pantalla del destino
+    setPantalla("destino")
+}
+
+    return (
         <div className="home-page">
+
 
             {/* ============================= */}
             {/* BARRA SUPERIOR */}
@@ -83,19 +717,33 @@ export const Home = ({ cambiarPagina }) => {
                     </div>
 
 
+                    {/* Buscador de la red social */}
+                    <div className="navbar-search-social">
+
+                        <input
+                            type="text"
+                            placeholder="Buscar destinos o viajeros..."
+                        />
+
+                    </div>
+
+
                     <button
-                        className="profile-button"
-                        onClick={() => cambiarPagina("perfil")}
-                    >
-                        Mi perfil
-                    </button>
+    className="profile-button"
+    onClick={() =>
+        setPantalla("perfil")
+    }
+>
+    Mi perfil
+</button>
 
                 </div>
 
             </header>
 
-
+{pantalla === "inicio" && (
             <main className="home-content">
+
 
                 {/* ============================= */}
                 {/* PORTADA PRINCIPAL */}
@@ -109,27 +757,23 @@ export const Home = ({ cambiarPagina }) => {
                             Tu próxima aventura empieza aquí
                         </span>
 
-
                         <h1>
                             Descubre nuevos destinos
                         </h1>
 
-
                         <p>
-                            Encuentra lugares increíbles, organiza tus viajes
-                            y descubre paquetes turísticos.
+                            Encuentra lugares increíbles, organiza tus viajes,
+                            descubre paquetes y comparte experiencias con otros viajeros.
                         </p>
 
 
                         {/* Buscador principal */}
-
                         <div className="hero-search">
 
                             <input
                                 type="text"
                                 placeholder="¿A dónde quieres viajar?"
                             />
-
 
                             <button>
                                 Buscar
@@ -151,18 +795,12 @@ export const Home = ({ cambiarPagina }) => {
                     <div className="section-title">
 
                         <div>
-
-                            <h4>
-                                Destinos destacados
-                            </h4>
-
+                            <h4>Destinos destacados</h4>
 
                             <p>
                                 Algunos lugares que podrían interesarte
                             </p>
-
                         </div>
-
 
                         <button className="link-button">
                             Ver todos
@@ -176,15 +814,17 @@ export const Home = ({ cambiarPagina }) => {
                         {destinos.map((destino) => (
 
                             <div
-                                className="destino-card"
-                                key={destino.id}
-                            >
+    className="destino-card"
+    key={destino.id}
+    onClick={() =>
+        abrirDestino(destino)
+    }
+>
 
                                 <img
                                     src={destino.imagen}
                                     alt={destino.nombre}
                                 />
-
 
                                 <div className="destino-card-info">
 
@@ -192,10 +832,415 @@ export const Home = ({ cambiarPagina }) => {
                                         {destino.nombre}
                                     </h5>
 
-
                                     <p>
                                         {destino.descripcion}
                                     </p>
+
+                                </div>
+
+                            </div>
+
+                        ))}
+
+                    </div>
+
+                </section>
+
+
+                {/* ===================================== */}
+                {/* COMUNIDAD / PARTE DE RED SOCIAL */}
+                {/* ===================================== */}
+
+                <section className="home-section">
+
+                    <div className="section-title">
+
+                        <div>
+
+                            <h4>
+                                Comunidad viajera
+                            </h4>
+
+                            <p>
+                                Mira lo que otros viajeros están compartiendo
+                            </p>
+
+                        </div>
+
+                        <button className="link-button">
+                            Ver comunidad
+                        </button>
+
+                    </div>
+
+
+                    {/* ================================= */}
+                    {/* CREAR UNA PUBLICACIÓN */}
+                    {/* ================================= */}
+
+                    {/* Botón principal para crear una publicación */}
+<div className="crear-publicacion-bar">
+
+    <div className="social-avatar">
+
+        {auth.currentUser?.displayName
+            ?.charAt(0)
+            .toUpperCase() ||
+            auth.currentUser?.email
+                ?.charAt(0)
+                .toUpperCase()
+        }
+
+    </div>
+
+
+    <button
+        className="abrir-publicacion"
+        onClick={() =>
+            setMostrarFormulario(!mostrarFormulario)
+        }
+    >
+
+        + Crear publicación
+
+    </button>
+
+</div>
+
+
+{/* El formulario solo aparece cuando el usuario
+    presiona Crear publicación */}
+{mostrarFormulario && (
+
+    <form
+        className="real-post-form"
+        onSubmit={crearPublicacion}
+    >
+
+        <div className="form-publicacion-titulo">
+
+            <div>
+
+                <strong>
+                    Crear publicación
+                </strong>
+
+                <span>
+                    Comparte tu experiencia con otros viajeros
+                </span>
+
+            </div>
+
+
+            {/* Permite cerrar el formulario */}
+            <button
+                type="button"
+                className="cerrar-formulario"
+                onClick={() =>
+                    setMostrarFormulario(false)
+                }
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        {/* Lugar */}
+        <div className="campo-publicacion">
+
+            <label>
+                Lugar
+            </label>
+
+            <input
+                type="text"
+                placeholder="Ej: Tamarindo, Costa Rica"
+                value={ubicacion}
+                onChange={(event) =>
+                    setUbicacion(event.target.value)
+                }
+            />
+
+        </div>
+
+
+        {/* Descripción */}
+        <div className="campo-publicacion">
+
+            <label>
+                ¿Cómo estuvo tu viaje?
+            </label>
+
+            <textarea
+                placeholder="Cuéntale a la comunidad sobre tu experiencia..."
+                value={descripcion}
+                onChange={(event) =>
+                    setDescripcion(event.target.value)
+                }
+            />
+
+        </div>
+
+
+        {/* Foto por URL por ahora */}
+        <div className="campo-publicacion">
+
+            <label>
+                Foto
+            </label>
+
+            <input
+                type="text"
+                placeholder="Pega el enlace de una fotografía"
+                value={imagen}
+                onChange={(event) =>
+                    setImagen(event.target.value)
+                }
+            />
+
+        </div>
+
+
+        <div className="post-form-bottom">
+
+            <span>
+                {mensajePublicacion}
+            </span>
+
+
+            <div className="publicacion-buttons">
+
+                <button
+                    type="button"
+                    className="cancelar-publicacion"
+                    onClick={() =>
+                        setMostrarFormulario(false)
+                    }
+                >
+                    Cancelar
+                </button>
+
+
+                <button
+                    type="submit"
+                    className="publicar-final"
+                >
+                    Publicar
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
+)}
+
+
+                    {/* ================================= */}
+                    {/* PUBLICACIONES */}
+                    {/* ================================= */}
+
+                    <div className="social-feed">
+
+                        {publicaciones.map((publicacion) => (
+
+                            <div
+                                className="social-post"
+                                key={publicacion.id}
+                            >
+
+
+                                {/* Información del usuario */}
+                                <div className="social-post-header">
+
+                                    <div className="social-avatar">
+                                        {publicacion.usuario
+    ?.charAt(0)
+    .toUpperCase()}
+                                    </div>
+
+
+                                    <div className="social-user-info">
+
+                                        <strong>
+                                            {publicacion.usuario}
+                                        </strong>
+
+                                        <span>
+                                            📍 {publicacion.ubicacion}
+                                        </span>
+
+                                    </div>
+
+
+                                    <button className="social-more">
+                                        •••
+                                    </button>
+
+                                </div>
+
+
+                                {/* Imagen */}
+                                <img
+                                    src={publicacion.imagen}
+                                    alt={publicacion.ubicacion}
+                                    className="social-post-image"
+                                />
+
+
+                                {/* Botones */}
+                                <div className="social-actions">
+
+                           <button
+    className={
+        publicacion.usuariosLike?.includes(
+            auth.currentUser?.uid
+        )
+            ? "social-like social-liked"
+            : "social-like"
+    }
+    onClick={() =>
+        cambiarLike(publicacion)
+    }
+>
+
+    {publicacion.usuariosLike?.includes(
+        auth.currentUser?.uid
+    )
+        ? "♥ Me gusta"
+        : "♡ Me gusta"
+    }
+
+</button>
+
+
+                                 {/* Abrir o cerrar comentarios */}
+<button
+    onClick={() => {
+
+        if (publicacionComentarioId === publicacion.id) {
+
+            setPublicacionComentarioId(null)
+
+        } else {
+
+            setPublicacionComentarioId(
+                publicacion.id
+            )
+        }
+    }}
+>
+    💬 Comentar
+</button>
+
+
+{/* Guardar o quitar de guardados */}
+<button
+    onClick={() =>
+        cambiarGuardado(publicacion)
+    }
+>
+
+    {publicacion.usuariosGuardaron?.includes(
+        auth.currentUser?.uid
+    )
+        ? "✓ Guardado"
+        : "Guardar"
+    }
+
+</button>
+
+                                </div>
+                                {/* ================================= */}
+{/* SECCIÓN DE COMENTARIOS */}
+{/* ================================= */}
+
+{publicacionComentarioId === publicacion.id && (
+
+    <div className="comment-section">
+
+        {/* Escribir un comentario */}
+        <div className="comment-input">
+
+            <input
+                type="text"
+                placeholder="Escribe un comentario..."
+                value={comentarioTexto}
+                onChange={(event) =>
+                    setComentarioTexto(event.target.value)
+                }
+            />
+
+            <button
+                onClick={() =>
+                    agregarComentario(publicacion)
+                }
+            >
+                Enviar
+            </button>
+
+        </div>
+
+
+        {/* Mostrar los comentarios existentes */}
+        <div className="comments-list">
+
+            {publicacion.listaComentarios?.map(
+                (comentario, index) => (
+
+                    <div
+                        className="comment-item"
+                        key={index}
+                    >
+
+                        <strong>
+                            {comentario.usuario}
+                        </strong>
+
+                        <span>
+                            {comentario.texto}
+                        </span>
+
+                    </div>
+
+                )
+            )}
+
+        </div>
+
+    </div>
+
+)}
+
+
+                                {/* Información debajo de la foto */}
+                                <div className="social-post-info">
+
+                                    <strong>
+                                        {publicacion.likes} Me gusta
+                                    </strong>
+
+
+                                    <p>
+
+                                        <b>
+                                            {publicacion.usuario}
+                                        </b>
+
+                                        {" "}
+
+                                        {publicacion.descripcion}
+
+                                    </p>
+
+
+                                    <button className="social-comments">
+
+                                        Ver los {publicacion.comentarios} comentarios
+
+                                    </button>
 
                                 </div>
 
@@ -218,17 +1263,13 @@ export const Home = ({ cambiarPagina }) => {
 
                         <div>
 
-                            <h4>
-                                Paquetes recomendados
-                            </h4>
-
+                            <h4>Paquetes recomendados</h4>
 
                             <p>
                                 Opciones para comenzar a planear tu viaje
                             </p>
 
                         </div>
-
 
                         <button className="link-button">
                             Ver todos
@@ -251,18 +1292,15 @@ export const Home = ({ cambiarPagina }) => {
                                     alt={paquete.nombre}
                                 />
 
-
                                 <div className="paquete-info">
 
                                     <span className="paquete-dias">
                                         {paquete.dias}
                                     </span>
 
-
                                     <h5>
                                         {paquete.nombre}
                                     </h5>
-
 
                                     <p>
                                         {paquete.destino}
@@ -277,13 +1315,11 @@ export const Home = ({ cambiarPagina }) => {
                                                 Desde
                                             </small>
 
-
                                             <strong>
                                                 ${paquete.precio}
                                             </strong>
 
                                         </div>
-
 
                                         <button>
                                             Ver detalles
@@ -302,7 +1338,661 @@ export const Home = ({ cambiarPagina }) => {
                 </section>
 
             </main>
+            )}
 
+            {/* ========================================= */}
+{/* PANTALLA EXPLORAR */}
+{/* ========================================= */}
+
+{pantalla === "explorar" && (
+
+    <main className="explore-page">
+
+
+        {/* Encabezado de Explorar */}
+        <section className="explore-header">
+
+            <span className="explore-small">
+                Explorar
+            </span>
+
+            <h2>
+                Encuentra tu próximo destino
+            </h2>
+
+            <p>
+                Busca destinos, lugares o experiencias
+                compartidas por otros viajeros.
+            </p>
+
+
+            {/* Buscador */}
+            <div className="explore-search">
+
+                <span>
+                    🔎
+                </span>
+
+                <input
+                    type="text"
+                    placeholder="Buscar Costa Rica, México, playa..."
+                    value={busquedaExplorar}
+                    onChange={(event) =>
+                        setBusquedaExplorar(
+                            event.target.value
+                        )
+                    }
+                />
+
+            </div>
+
+        </section>
+
+
+        {/* ================================= */}
+        {/* DESTINOS */}
+        {/* ================================= */}
+
+        <section className="home-section">
+
+            <div className="section-title">
+
+                <div>
+
+                    <h4>
+                        Destinos
+                    </h4>
+
+                    <p>
+                        Lugares que puedes descubrir
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            {destinosExplorar.length === 0 ? (
+
+                <div className="explore-empty">
+
+                    <p>
+                        No encontramos destinos con esa búsqueda.
+                    </p>
+
+                </div>
+
+            ) : (
+
+                <div className="destinos-grid">
+
+                    {destinosExplorar.map(
+                        (destino) => (
+
+                            <div
+    className="destino-card"
+    key={destino.id}
+    onClick={() =>
+        abrirDestino(destino)
+    }
+>
+
+                                <img
+                                    src={destino.imagen}
+                                    alt={destino.nombre}
+                                />
+
+                                <div className="destino-card-info">
+
+                                    <h5>
+                                        {destino.nombre}
+                                    </h5>
+
+                                    <p>
+                                        {destino.descripcion}
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        )
+                    )}
+
+                </div>
+
+            )}
+
+        </section>
+
+
+        {/* ================================= */}
+        {/* PUBLICACIONES PARA DESCUBRIR */}
+        {/* ================================= */}
+
+        <section className="home-section">
+
+            <div className="section-title">
+
+                <div>
+
+                    <h4>
+                        Experiencias de viajeros
+                    </h4>
+
+                    <p>
+                        Descubre lugares compartidos
+                        por la comunidad
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            {publicacionesExplorar.length === 0 ? (
+
+                <div className="explore-empty">
+
+                    <p>
+                        No encontramos publicaciones
+                        con esa búsqueda.
+                    </p>
+
+                </div>
+
+            ) : (
+
+                <div className="explore-post-grid">
+
+                    {publicacionesExplorar.map(
+                        (publicacion) => (
+
+                            <div
+                                className="explore-post-card"
+                                key={publicacion.id}
+                            >
+
+                                <img
+                                    src={publicacion.imagen}
+                                    alt={publicacion.ubicacion}
+                                />
+
+
+                                <div className="explore-post-info">
+
+
+                                    {/* Usuario */}
+                                    <div className="explore-user">
+
+                                        <div className="social-avatar">
+
+                                            {publicacion.usuario
+                                                ?.charAt(0)
+                                                .toUpperCase()}
+
+                                        </div>
+
+
+                                        <div>
+
+                                            <strong>
+                                                {publicacion.usuario}
+                                            </strong>
+
+                                            <span>
+                                                📍 {publicacion.ubicacion}
+                                            </span>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    {/* Descripción */}
+                                    <p>
+                                        {publicacion.descripcion}
+                                    </p>
+
+
+                                    {/* Información de la publicación */}
+                                    <span className="explore-post-stats">
+
+                                        ♥ {publicacion.likes || 0}
+                                        {" · "}
+                                        💬 {publicacion.comentarios || 0}
+
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        )
+                    )}
+
+                </div>
+
+            )}
+
+        </section>
+
+    </main>
+
+)}
+
+
+{/* ========================================= */}
+{/* INFORMACIÓN DEL DESTINO */}
+{/* ========================================= */}
+
+{pantalla === "destino" && destinoSeleccionado && (
+
+    <main className="destination-detail-page">
+
+
+        {/* Botón para regresar */}
+        <button
+            className="destination-back"
+            onClick={() =>
+                setPantalla(pantallaAnterior)
+            }
+        >
+            ← Volver
+        </button>
+
+
+        {/* Información principal */}
+        <section className="destination-detail-card">
+
+
+            {/* Imagen del destino */}
+            <img
+                src={destinoSeleccionado.imagen}
+                alt={destinoSeleccionado.nombre}
+                className="destination-detail-image"
+            />
+
+
+            <div className="destination-detail-info">
+
+                <span className="destination-small">
+                    Destino
+                </span>
+
+                <h1>
+                    {destinoSeleccionado.nombre}
+                </h1>
+
+                <p>
+                    {destinoSeleccionado.descripcion}
+                </p>
+
+
+                {/* Resumen del destino */}
+<p className="destination-summary">
+
+    {destinoSeleccionado.resumen}
+
+</p>
+
+
+{/* Información del destino */}
+<div className="destination-travel-info">
+
+
+    {/* Clima */}
+    <div className="destination-travel-card">
+
+        <h4>
+            ☀️ Clima
+        </h4>
+
+        <p>
+            {destinoSeleccionado.clima}
+        </p>
+
+    </div>
+
+
+    {/* Cultura */}
+    <div className="destination-travel-card">
+
+        <h4>
+            🎭 Cultura y tradiciones
+        </h4>
+
+        <p>
+            {destinoSeleccionado.cultura}
+        </p>
+
+    </div>
+
+
+    {/* Actividades */}
+    <div className="destination-travel-card">
+
+        <h4>
+            🧳 ¿Qué puedes hacer?
+        </h4>
+
+
+        <div className="destination-activities">
+
+            {destinoSeleccionado.actividades?.map(
+                (actividad, index) => (
+
+                    <span key={index}>
+                        {actividad}
+                    </span>
+
+                )
+            )}
+
+        </div>
+
+    </div>
+
+</div>
+
+            </div>
+
+        </section>
+
+
+        {/* Sección inferior */}
+        <section className="destination-extra">
+
+            <h3>
+                Descubre {destinoSeleccionado.nombre}
+            </h3>
+
+            <p>
+                Encuentra experiencias de otros viajeros,
+                lugares interesantes y opciones para comenzar
+                a planear tu viaje.
+            </p>
+
+
+            <button
+                onClick={() => {
+                    setBusquedaExplorar(
+                        destinoSeleccionado.nombre
+                    )
+
+                    setPantalla("explorar")
+                }}
+            >
+                Ver experiencias
+            </button>
+
+        </section>
+
+    </main>
+
+)}
+
+{/* ========================================= */}
+{/* PERFIL DEL USUARIO */}
+{/* ========================================= */}
+
+{pantalla === "perfil" && (
+
+    <main className="profile-page">
+
+        {/* Parte superior del perfil */}
+        <section className="profile-header-card">
+
+            <div className="profile-avatar-large">
+
+                {auth.currentUser?.displayName
+                    ?.charAt(0)
+                    .toUpperCase() ||
+                    auth.currentUser?.email
+                        ?.charAt(0)
+                        .toUpperCase()
+                }
+
+            </div>
+
+
+            <div className="profile-main-info">
+
+                <h2>
+                    {auth.currentUser?.displayName ||
+                        auth.currentUser?.email}
+                </h2>
+
+                <span>
+                    Viajero en Entre Destinos
+                </span>
+
+
+                <div className="profile-stats">
+
+                    <div>
+                        <strong>
+                            {misPublicaciones.length}
+                        </strong>
+
+                        <span>
+                            Publicaciones
+                        </span>
+                    </div>
+
+
+                    <div>
+                        <strong>
+                            {publicacionesGuardadas.length}
+                        </strong>
+
+                        <span>
+                            Guardados
+                        </span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        {/* Pestañas del perfil */}
+        <div className="profile-tabs">
+
+            <button
+                className={
+                    seccionPerfil === "mis-publicaciones"
+                        ? "profile-tab-active"
+                        : ""
+                }
+                onClick={() =>
+                    setSeccionPerfil("mis-publicaciones")
+                }
+            >
+                Mis publicaciones
+            </button>
+
+
+            <button
+                className={
+                    seccionPerfil === "guardados"
+                        ? "profile-tab-active"
+                        : ""
+                }
+                onClick={() =>
+                    setSeccionPerfil("guardados")
+                }
+            >
+                Guardados
+            </button>
+
+        </div>
+
+
+        {/* ================================= */}
+        {/* MIS PUBLICACIONES */}
+        {/* ================================= */}
+
+        {seccionPerfil === "mis-publicaciones" && (
+
+            <div className="profile-post-grid">
+
+                {misPublicaciones.length === 0 ? (
+
+                    <div className="profile-empty">
+
+                        <h4>
+                            Todavía no tienes publicaciones
+                        </h4>
+
+                        <p>
+                            Comparte algún viaje con la comunidad.
+                        </p>
+
+                    </div>
+
+                ) : (
+
+                    misPublicaciones.map((publicacion) => (
+
+                        <div
+                            className="profile-post-card"
+                            key={publicacion.id}
+                        >
+
+                            <img
+                                src={publicacion.imagen}
+                                alt={publicacion.ubicacion}
+                            />
+
+
+                            <div className="profile-post-card-info">
+
+                                <strong>
+                                    📍 {publicacion.ubicacion}
+                                </strong>
+
+                                <p>
+                                    {publicacion.descripcion}
+                                </p>
+
+                                <span>
+                                    ♥ {publicacion.likes || 0} Me gusta
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    ))
+
+                )}
+
+            </div>
+
+        )}
+
+
+        {/* ================================= */}
+        {/* PUBLICACIONES GUARDADAS */}
+        {/* ================================= */}
+
+        {seccionPerfil === "guardados" && (
+
+            <div className="profile-post-grid">
+
+                {publicacionesGuardadas.length === 0 ? (
+
+                    <div className="profile-empty">
+
+                        <h4>
+                            No tienes publicaciones guardadas
+                        </h4>
+
+                        <p>
+                            Usa el botón Guardar en las publicaciones que te gusten.
+                        </p>
+
+                    </div>
+
+                ) : (
+
+                    publicacionesGuardadas.map(
+                        (publicacion) => (
+
+                            <div
+                                className="profile-post-card"
+                                key={publicacion.id}
+                            >
+
+                                <img
+                                    src={publicacion.imagen}
+                                    alt={publicacion.ubicacion}
+                                />
+
+
+                                <div className="profile-post-card-info">
+
+                                    <div className="saved-user">
+
+                                        <div className="social-avatar">
+
+                                            {publicacion.usuario
+                                                ?.charAt(0)
+                                                .toUpperCase()}
+
+                                        </div>
+
+
+                                        <div>
+
+                                            <strong>
+                                                {publicacion.usuario}
+                                            </strong>
+
+                                            <span>
+                                                📍 {publicacion.ubicacion}
+                                            </span>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <p>
+                                        {publicacion.descripcion}
+                                    </p>
+
+
+                                    <button
+                                        className="remove-saved"
+                                        onClick={() =>
+                                            cambiarGuardado(
+                                                publicacion
+                                            )
+                                        }
+                                    >
+                                        Quitar de guardados
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        )
+                    )
+
+                )}
+
+            </div>
+
+        )}
+
+    </main>
+
+)}
 
             {/* ============================= */}
             {/* MENÚ INFERIOR */}
@@ -310,30 +2000,55 @@ export const Home = ({ cambiarPagina }) => {
 
             <nav className="bottom-menu">
 
-                <button className="menu-activo">
-                    Inicio
-                </button>
+                <button
+    className={
+        pantalla === "inicio"
+            ? "menu-activo"
+            : ""
+    }
+    onClick={() =>
+        setPantalla("inicio")
+    }
+>
+    Inicio
+</button>
 
+                <button
+    className={
+        pantalla === "explorar"
+            ? "menu-activo"
+            : ""
+    }
+    onClick={() =>
+        setPantalla("explorar")
+    }
+>
+    Explorar
+</button>
 
                 <button>
-                    Explorar
+                    Comunidad
                 </button>
-
 
                 <button>
                     Mis viajes
                 </button>
 
-
                 <button
-                    onClick={() => cambiarPagina("perfil")}
-                >
-                    Perfil
-                </button>
+    className={
+        pantalla === "perfil"
+            ? "menu-activo"
+            : ""
+    }
+    onClick={() =>
+        setPantalla("perfil")
+    }
+>
+    Perfil
+</button>
 
             </nav>
 
         </div>
-
     )
 }

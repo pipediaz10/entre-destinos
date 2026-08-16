@@ -1,55 +1,47 @@
+// useState nos permite guardar información que puede cambiar
 import { useState } from "react"
 
+// Importamos las páginas principales
 import { Login } from "./pages/Login"
+import { Register } from "./pages/Register"
 import { Home } from "./pages/Home"
-import { Profile } from "./pages/Profile"
 
 
 export const App = () => {
 
-    // Guarda si el usuario inició sesión
+    // Indica si el usuario ya inició sesión
     const [usuarioActivo, setUsuarioActivo] = useState(false)
 
-    // Guarda la página que se está mostrando
-    const [paginaActual, setPaginaActual] = useState("inicio")
+    // Controla si mostramos Login o Registro
+    const [pantalla, setPantalla] = useState("login")
 
 
-    // Permite cambiar entre las páginas
-    const cambiarPagina = (pagina) => {
-
-        setPaginaActual(pagina)
-
-        // Regresa la pantalla hacia arriba
-        window.scrollTo(0, 0)
-    }
-
-
-    // Si todavía no inició sesión, muestra el Login
+    // Si el usuario todavía no inició sesión
     if (!usuarioActivo) {
 
+        // Mostramos Crear cuenta
+        if (pantalla === "registro") {
+
+            return (
+                <Register
+                    setPantalla={setPantalla}
+                />
+            )
+        }
+
+
+        // Por defecto mostramos Login
         return (
             <Login
                 setUsuarioActivo={setUsuarioActivo}
+                setPantalla={setPantalla}
             />
         )
     }
 
 
-    // Muestra el perfil
-    if (paginaActual === "perfil") {
-
-        return (
-            <Profile
-                cambiarPagina={cambiarPagina}
-            />
-        )
-    }
-
-
-    // Muestra la pantalla principal
+    // Solo mostramos Home después de iniciar sesión correctamente
     return (
-        <Home
-            cambiarPagina={cambiarPagina}
-        />
+        <Home setUsuarioActivo={setUsuarioActivo} />
     )
 }

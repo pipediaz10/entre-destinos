@@ -1,18 +1,63 @@
+// useState permite guardar los datos escritos por el usuario
+import { useState } from "react"
+
+// Función de Firebase para iniciar sesión
+import { signInWithEmailAndPassword } from "firebase/auth"
+
+// Importamos la autenticación configurada en firebase.js
+import { auth } from "../firebase"
+
 // Importamos el logo oficial de Entre Destinos
 import logo from "../assets/logo.png"
 
 
-export const Login = ({ setUsuarioActivo }) => {
+export const Login = ({
+    setUsuarioActivo,
+    setPantalla
+}) => {
 
-    // Esta función se ejecuta cuando se envía el formulario
-    const iniciarSesion = (event) => {
+    // Guarda el correo escrito por el usuario
+    const [correo, setCorreo] = useState("")
 
-        // Evita que la página se recargue
+    // Guarda la contraseña escrita por el usuario
+    const [contrasena, setContrasena] = useState("")
+
+    // Guarda los mensajes de error
+    const [error, setError] = useState("")
+
+
+    // Esta función se ejecuta cuando presionamos Iniciar sesión
+    const iniciarSesion = async (event) => {
+
+        // Evitamos que la página se recargue
         event.preventDefault()
 
-        // Por ahora simulamos que el usuario inició sesión.
-        // Más adelante esta parte se conectará con Firebase.
-        setUsuarioActivo(true)
+        // Limpiamos mensajes anteriores
+        setError("")
+
+
+        try {
+
+            // Firebase revisa si el correo y contraseña son correctos
+            await signInWithEmailAndPassword(
+                auth,
+                correo,
+                contrasena
+            )
+
+
+            // Si Firebase acepta los datos,
+            // permitimos entrar a la página principal
+            setUsuarioActivo(true)
+
+        } catch (errorFirebase) {
+
+            // Si los datos son incorrectos mostramos un mensaje
+            setError("Correo o contraseña incorrectos")
+
+            // Dejamos el error en consola por si necesitamos revisarlo
+            console.error(errorFirebase)
+        }
     }
 
 
@@ -42,6 +87,7 @@ export const Login = ({ setUsuarioActivo }) => {
                 {/* Formulario de inicio de sesión */}
                 <form onSubmit={iniciarSesion}>
 
+                    {/* Correo electrónico */}
                     <div className="mb-3">
 
                         <label className="form-label">
@@ -52,12 +98,17 @@ export const Login = ({ setUsuarioActivo }) => {
                             type="email"
                             className="form-control"
                             placeholder="correo@ejemplo.com"
+                            value={correo}
+                            onChange={(event) =>
+                                setCorreo(event.target.value)
+                            }
                             required
                         />
 
                     </div>
 
 
+                    {/* Contraseña */}
                     <div className="mb-3">
 
                         <label className="form-label">
@@ -68,10 +119,22 @@ export const Login = ({ setUsuarioActivo }) => {
                             type="password"
                             className="form-control"
                             placeholder="Ingrese su contraseña"
+                            value={contrasena}
+                            onChange={(event) =>
+                                setContrasena(event.target.value)
+                            }
                             required
                         />
 
                     </div>
+
+
+                    {/* Mensaje si ocurre un error */}
+                    {error && (
+                        <div className="alert alert-danger">
+                            {error}
+                        </div>
+                    )}
 
 
                     {/* Botón principal */}
@@ -85,14 +148,17 @@ export const Login = ({ setUsuarioActivo }) => {
                 </form>
 
 
-                {/* Opción para crear una cuenta */}
+                {/* Ir a Crear cuenta */}
                 <div className="login-register">
 
                     <span>
                         ¿No tienes una cuenta?
                     </span>
 
-                    <span className="crear-cuenta">
+                    <span
+                        className="crear-cuenta"
+                        onClick={() => setPantalla("registro")}
+                    >
                         Crear cuenta
                     </span>
 
