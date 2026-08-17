@@ -2806,3 +2806,44 @@ body {
         flex: 0 0 auto;
     }
 }
+
+
+/* Acciones del usuario en la barra superior */
+.navbar-user-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logout-button {
+    border-color: #b6404b;
+    color: #b6404b;
+}
+
+.logout-button:hover {
+    border-color: #b6404b;
+    background-color: #b6404b;
+    color: white;
+}
+
+@media (max-width: 900px) {
+    .home-navbar-content {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .navbar-main-menu {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 500px) {
+    .navbar-user-actions .profile-button {
+        display: block;
+        padding: 7px 10px;
+        font-size: 12px;
+    }
+}

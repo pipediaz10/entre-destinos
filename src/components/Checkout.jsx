@@ -1,7 +1,48 @@
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { auth } from "../services/firebase"
 
 const hoy = new Date().toISOString().split("T")[0]
+
+const formatearTelefono = (valor) => {
+    const numeros = valor.replace(/\D/g, "").slice(0, 8)
+
+    if (numeros.length > 4) {
+        return `${numeros.slice(0, 4)}-${numeros.slice(4)}`
+    }
+
+    return numeros
+}
+
+const formatearTarjeta = (valor) => {
+    return valor
+        .replace(/\D/g, "")
+        .slice(0, 16)
+        .replace(/(.{4})/g, "$1 ")
+        .trim()
+}
+
+const formatearVencimiento = (valor) => {
+    const numeros = valor.replace(/\D/g, "").slice(0, 4)
+
+    if (numeros.length > 2) {
+        return `${numeros.slice(0, 2)}/${numeros.slice(2)}`
+    }
+
+    return numeros
+}
+
+const vencimientoValido = (valor) => {
+    if (!/^\d{2}\/\d{2}$/.test(valor)) return false
+
+    const [mes, ano] = valor.split("/").map(Number)
+    if (mes < 1 || mes > 12) return false
+
+    const fechaActual = new Date()
+    const anoActual = Number(String(fechaActual.getFullYear()).slice(-2))
+    const mesActual = fechaActual.getMonth() + 1
+
+    return ano > anoActual || (ano === anoActual && mes >= mesActual)
+}
 
 export const Checkout = ({ paquete, paquetes = [], onVolver, onRegistrarActividad }) => {
     const [paqueteId, setPaqueteId] = useState(paquete?.id ? String(paquete.id) : "")
@@ -23,10 +64,6 @@ export const Checkout = ({ paquete, paquetes = [], onVolver, onRegistrarActivida
     const [codigoPromo, setCodigoPromo] = useState("")
     const [descuento, setDescuento] = useState(0)
     const [mensaje, setMensaje] = useState("")
-
-    useEffect(() => {
-        if (paquete?.id) setPaqueteId(String(paquete.id))
-    }, [paquete])
 
     const paqueteActual = useMemo(
         () => paquetes.find((item) => String(item.id) === paqueteId) || null,
@@ -56,11 +93,14 @@ export const Checkout = ({ paquete, paquetes = [], onVolver, onRegistrarActivida
     const validarPago = () => {
         if (metodoPago === "tarjeta") {
             const tarjetaLimpia = numeroTarjeta.replace(/\s/g, "")
-            if (!nombreTarjeta.trim() || !/^\d{13,19}$/.test(tarjetaLimpia)) {
-                return "Completa correctamente el nombre y número de la tarjeta."
+            if (!nombreTarjeta.trim() || !/^\d{16}$/.test(tarjetaLimpia)) {
+                return "El número de tarjeta debe contener exactamente 16 dígitos."
             }
-            if (!/^\d{2}\/\d{2}$/.test(vencimiento) || !/^\d{3,4}$/.test(cvv)) {
-                return "Revisa la fecha de vencimiento (MM/AA) y el CVV."
+            if (!vencimientoValido(vencimiento)) {
+                return "Ingresa un vencimiento válido en formato MM/AA."
+            }
+            if (!/^\d{3}$/.test(cvv)) {
+                return "El CVV debe contener exactamente 3 dígitos."
             }
         }
 
@@ -68,8 +108,8 @@ export const Checkout = ({ paquete, paquetes = [], onVolver, onRegistrarActivida
             return "Ingresa el correo asociado a PayPal."
         }
 
-        if (metodoPago === "sinpe" && !telefonoSinpe.trim()) {
-            return "Ingresa el número de teléfono para SINPE Móvil."
+        if (metodoPago === "sinpe" && !/^\d{4}-\d{4}$/.test(telefonoSinpe)) {
+            return "El teléfono de SINPE debe contener exactamente 8 dígitos."
         }
 
         return ""
@@ -86,6 +126,11 @@ export const Checkout = ({ paquete, paquetes = [], onVolver, onRegistrarActivida
 
         if (!nombreCompleto.trim() || !correo.trim() || !telefono.trim() || !fechaInicio || !fechaFin) {
             setMensaje("Completa tus datos personales y el rango de fechas.")
+            return
+        }
+
+        if (!/^\d{4}-\d{4}$/.test(telefono)) {
+            setMensaje("El teléfono debe contener exactamente 8 dígitos.")
             return
         }
 
@@ -185,7 +230,7 @@ export const Checkout = ({ paquete, paquetes = [], onVolver, onRegistrarActivida
                             min="1"
                             max="10"
                             value={viajeros}
-                            onChange={(event) => setViajeros(Math.max(1, Number(event.target.value) || 1))}
+                            onChange={(event) => setViajeros(Math.min(10, Math.max(1, Number(event.target.value) || 1)))}
                             required
                         />
                     </div>
@@ -224,7 +269,8 @@ export const Checkout = ({ paquete, paquetes = [], onVolver, onRegistrarActivida
                                 type="tel"
                                 placeholder="8888-8888"
                                 value={telefono}
-                                onChange={(event) => setTelefono(event.target.value)}
+                                onChange={(event) => setTelefono(formatearTelefono(event.target.value))}
+                                maxLength="9"
                                 required
                             />
                         </div>
@@ -260,9 +306,9 @@ export const Checkout = ({ paquete, paquetes = [], onVolver, onRegistrarActivida
                                     id="numero-tarjeta"
                                     type="text"
                                     inputMode="numeric"
-                                    maxLength="23"
+                                    maxLength="19"
                                     value={numeroTarjeta}
-                                    onChange={(event) => setNumeroTarjeta(event.target.value.replace(/[^0-9 ]/g, ""))}
+                                    onChange={(event) => setNumeroTarjeta(formatearTarjeta(event.target.value))}
                                     placeholder="4242 4242 4242 4242"
                                     required
                                 />
@@ -271,11 +317,11 @@ export const Checkout = ({ paquete, paquetes = [], onVolver, onRegistrarActivida
                             <div className="checkout-field-row">
                                 <div className="checkout-field">
                                     <label htmlFor="vencimiento">Vencimiento</label>
-                                    <input id="vencimiento" type="text" maxLength="5" value={vencimiento} onChange={(event) => setVencimiento(event.target.value.replace(/[^0-9/]/g, ""))} placeholder="MM/AA" required />
+                                    <input id="vencimiento" type="text" inputMode="numeric" maxLength="5" value={vencimiento} onChange={(event) => setVencimiento(formatearVencimiento(event.target.value))} placeholder="MM/AA" required />
                                 </div>
                                 <div className="checkout-field">
                                     <label htmlFor="cvv">CVV</label>
-                                    <input id="cvv" type="password" inputMode="numeric" maxLength="4" value={cvv} onChange={(event) => setCvv(event.target.value.replace(/\D/g, ""))} placeholder="123" required />
+                                    <input id="cvv" type="password" inputMode="numeric" maxLength="3" value={cvv} onChange={(event) => setCvv(event.target.value.replace(/\D/g, "").slice(0, 3))} placeholder="123" required />
                                 </div>
                             </div>
                         </div>
@@ -294,7 +340,7 @@ export const Checkout = ({ paquete, paquetes = [], onVolver, onRegistrarActivida
                         <div className="payment-details-box">
                             <div className="checkout-field">
                                 <label htmlFor="sinpe-telefono">Teléfono de SINPE Móvil</label>
-                                <input id="sinpe-telefono" type="tel" value={telefonoSinpe} onChange={(event) => setTelefonoSinpe(event.target.value)} placeholder="8888-8888" required />
+                                <input id="sinpe-telefono" type="tel" maxLength="9" value={telefonoSinpe} onChange={(event) => setTelefonoSinpe(formatearTelefono(event.target.value))} placeholder="8888-8888" required />
                             </div>
                         </div>
                     )}

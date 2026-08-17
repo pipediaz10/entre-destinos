@@ -11,11 +11,10 @@ import { DestinoDetalle } from "./DestinoDetalle"
 import { Perfil } from "./Perfil"
 import { Checkout } from "./Checkout"
 import { Actividad } from "./Actividad"
-import { BottomMenu } from "./BottomMenu"
 import { useActividad } from "./useActividad"
 import { usePublicaciones } from "./usePublicaciones"
 
-export const Home = () => {
+export const Home = ({ onCerrarSesion }) => {
     const [pantalla, setPantalla] = useState("inicio")
     const [pantallaAnterior, setPantallaAnterior] = useState("inicio")
     const [seccionPerfil, setSeccionPerfil] = useState("mis-publicaciones")
@@ -99,7 +98,11 @@ export const Home = () => {
 
     return (
         <div className="home-page">
-            <Navbar pantalla={pantalla} onNavegar={navegar} />
+            <Navbar
+                pantalla={pantalla}
+                onNavegar={navegar}
+                onCerrarSesion={onCerrarSesion}
+            />
 
             {pantalla === "inicio" && (
                 <Inicio
@@ -174,7 +177,6 @@ export const Home = () => {
                 />
             )}
 
-            <BottomMenu pantalla={pantalla} setPantalla={setPantalla} />
         </div>
     )
 }
