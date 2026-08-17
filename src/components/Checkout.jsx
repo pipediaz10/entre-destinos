@@ -21,8 +21,20 @@ const formatearTarjeta = (valor) => {
         .trim()
 }
 
-const formatearVencimiento = (valor) => {
-    const numeros = valor.replace(/\D/g, "").slice(0, 4)
+const formatearVencimiento = (valor, valorAnterior) => {
+    let numeros = valor.replace(/\D/g, "").slice(0, 4)
+
+    if (numeros.length === 1 && Number(numeros) > 1) {
+        numeros = `0${numeros}`
+    }
+
+    if (numeros.length >= 2) {
+        const mes = Number(numeros.slice(0, 2))
+
+        if (mes < 1 || mes > 12) {
+            return valorAnterior
+        }
+    }
 
     if (numeros.length > 2) {
         return `${numeros.slice(0, 2)}/${numeros.slice(2)}`
@@ -317,7 +329,7 @@ export const Checkout = ({ paquete, paquetes = [], onVolver, onRegistrarActivida
                             <div className="checkout-field-row">
                                 <div className="checkout-field">
                                     <label htmlFor="vencimiento">Vencimiento</label>
-                                    <input id="vencimiento" type="text" inputMode="numeric" maxLength="5" value={vencimiento} onChange={(event) => setVencimiento(formatearVencimiento(event.target.value))} placeholder="MM/AA" required />
+                                    <input id="vencimiento" type="text" inputMode="numeric" maxLength="5" value={vencimiento} onChange={(event) => setVencimiento(formatearVencimiento(event.target.value, vencimiento))} placeholder="MM/AA" required />
                                 </div>
                                 <div className="checkout-field">
                                     <label htmlFor="cvv">CVV</label>
@@ -345,9 +357,6 @@ export const Checkout = ({ paquete, paquetes = [], onVolver, onRegistrarActivida
                         </div>
                     )}
 
-                    <p className="checkout-demo-note">
-                        Demo académico: los datos de pago se validan únicamente en pantalla y no se guardan ni se envían a un procesador real.
-                    </p>
                 </section>
 
                 <aside className="checkout-summary-card">

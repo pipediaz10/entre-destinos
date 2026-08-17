@@ -110,6 +110,10 @@ export const Home = ({ onCerrarSesion }) => {
                     paquetes={paquetes}
                     onAbrirDestino={abrirDestino}
                     onVerPaquete={abrirCheckout}
+                    onBuscar={(texto) => {
+                        setBusquedaExplorar(texto)
+                        setPantalla("explorar")
+                    }}
                 />
             )}
 

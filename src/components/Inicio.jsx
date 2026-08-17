@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { Destinos } from "./Destinos"
 import { Paquetes } from "./Paquetes"
 
@@ -5,8 +6,17 @@ export const Inicio = ({
     destinos,
     paquetes,
     onAbrirDestino,
-    onVerPaquete
-}) => (
+    onVerPaquete,
+    onBuscar
+}) => {
+    const [busqueda, setBusqueda] = useState("")
+
+    const buscarDestino = (event) => {
+        event.preventDefault()
+        onBuscar(busqueda.trim())
+    }
+
+    return (
     <main className="home-content">
         <section className="hero-section">
             <div className="hero-text">
@@ -16,14 +26,20 @@ export const Inicio = ({
                     Encuentra lugares increíbles, organiza tus viajes, descubre paquetes
                     y comparte experiencias con otros viajeros.
                 </p>
-                <div className="hero-search">
-                    <input type="text" placeholder="¿A dónde quieres viajar?" />
-                    <button>Buscar</button>
-                </div>
+                <form className="hero-search" onSubmit={buscarDestino}>
+                    <input
+                        type="text"
+                        placeholder="¿A dónde quieres viajar?"
+                        value={busqueda}
+                        onChange={(event) => setBusqueda(event.target.value)}
+                    />
+                    <button type="submit">Buscar</button>
+                </form>
             </div>
         </section>
 
         <Destinos destinos={destinos} onAbrirDestino={onAbrirDestino} />
         <Paquetes paquetes={paquetes} onVerDetalle={onVerPaquete} />
     </main>
-)
+    )
+}
